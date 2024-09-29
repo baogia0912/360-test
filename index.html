@@ -14,6 +14,18 @@
             width: 100vw;
             height: 100vh;
         }
+
+        #fullscreen-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
     </style>
     <!-- Include THREE.js and Panolens.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
@@ -22,6 +34,7 @@
 <body>
 
     <div id="panorama"></div>
+    <button id="fullscreen-button">Click to Enter Fullscreen</button>
 
     <script>
         // Initialize the panorama
@@ -43,9 +56,23 @@
         // Automatically enable Cardboard mode
         viewer.enableEffect(PANOLENS.MODES.CARDBOARD);
 
-        // Automatically enable fullscreen
-        document.addEventListener('DOMContentLoaded', function() {
-            document.documentElement.requestFullscreen();
+        // Handle fullscreen button click
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        fullscreenButton.addEventListener('click', () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
+            }
+        });
+
+        // Hide the fullscreen button after entering fullscreen mode
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenButton.style.display = 'none';  // Hide button after fullscreen is activated
+            } else {
+                fullscreenButton.style.display = 'block'; // Show button when not in fullscreen
+            }
         });
 
         // Handle gyroscope for mobile devices
