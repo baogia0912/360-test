@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>360 Video Viewer</title>
     <style>
         body {
@@ -22,20 +22,67 @@
 <body>
 
     <div id="panorama"></div>
+    <button id="fullscreen-button">Fullscreen</button>
 
     <script>
+        // Initialize the panorama
         const panorama = new PANOLENS.VideoPanorama('1080p.mp4');
         const viewer = new PANOLENS.Viewer({
-            container: document.getElementById('panorama')
+            container: document.getElementById('panorama'),
+            controlBar: true,  // Show control bar for touch interaction
         });
         viewer.add(panorama);
 
-        // Listen for the video to be fully loaded before attempting to play it
-        panorama.addEventListener('video-loaded', function(){
-            console.log('Video is loaded and ready to play');
-            panorama.video.play(); // Play the video once it's loaded
+        // Set the video element properties to ensure autoplay
+        panorama.addEventListener('video-loaded', function() {
+            // Mute and play to ensure autoplay is allowed on mobile
+            panorama.video.muted = true; // Mute the video to enable auto-play on mobile
+            panorama.video.setAttribute('playsinline', 'playsinline'); // For iOS
+            panorama.video.play();  // Auto-play the video once it's loaded
         });
 
+
+        viewer.enableEffect(PANOLENS.MODES.CARDBOARD);
+
+        // Enable fullscreen functionality
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        fullscreenButton.addEventListener('click', () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
+            }
+        });
+
+        // Handle gyroscope for mobile devices
+        if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // For iOS 13+ devices (request permission to use gyroscope)
+            DeviceOrientationEvent.requestPermission().then(response => {
+                if (response === 'granted') {
+                    enableGyroscopeControl();
+                }
+            }).catch(error => {
+                console.log('Gyroscope access was denied: ', error);
+                enableMouseControl(); // Fallback to mouse control
+            });
+        } else if ('DeviceOrientationEvent' in window) {
+            // For non-iOS devices (Android, older iOS)
+            window.addEventListener('deviceorientation', enableGyroscopeControl, false);
+        } else {
+            enableMouseControl(); // Fallback if no gyroscope
+        }
+
+        // Enable gyroscope control
+        function enableGyroscopeControl() {
+            viewer.enableControl(PANOLENS.CONTROLS.DEVICEORIENTATION);  // Enable device orientation
+            console.log('Gyroscope control enabled.');
+        }
+
+        // Fallback to mouse control if device orientation is unavailable
+        function enableMouseControl() {
+            viewer.enableControl(PANOLENS.CONTROLS.ORBIT);  // Fallback to mouse control
+            console.log('Mouse control enabled as fallback.');
+        }
     </script>
 
 </body>
