@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360 Video Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #panorama {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+    <!-- Include THREE.js and Panolens.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/panolens@0.10.2/build/panolens.min.js"></script>
+</head>
+<body>
+
+    <div id="panorama"></div>
+
+    <script>
+        const panorama = new PANOLENS.VideoPanorama('1080p.mp4');
+        const viewer = new PANOLENS.Viewer({
+            container: document.getElementById('panorama')
+        });
+        viewer.add(panorama);
+
+        // Listen for the video to be fully loaded before attempting to play it
+        panorama.addEventListener('video-loaded', function(){
+            console.log('Video is loaded and ready to play');
+            panorama.video.play(); // Play the video once it's loaded
+        });
+
+    </script>
+
+</body>
+</html>
